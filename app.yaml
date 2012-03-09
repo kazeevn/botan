@@ -1,0 +1,16 @@
+application: brain-of
+version: 2
+runtime: python27
+api_version: 1
+threadsafe: true
+
+libraries:
+- name: django
+  version: "1.3"
+- name: markupsafe
+  version: "latest"
+- name: lxml
+  version: "latest"
+
+builtins:
+- django_wsgi: on
