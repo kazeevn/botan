@@ -1,6 +1,3 @@
-"""
-main url configuration file for the askbot site
-"""
 from django.conf.urls.defaults import patterns, include, handler404, handler500, url
 from django.conf import settings
 
@@ -9,6 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     (r'%s' % settings.ASKBOT_URL, include('askbot.urls')),
+    (r'^notes/', include('notes.urls')),
     (r'^admin/', include(admin.site.urls)),
     #(r'^cache/', include('keyedcache.urls')), - broken views disable for now
     (r'^settings/', include('askbot.deps.livesettings.urls')),

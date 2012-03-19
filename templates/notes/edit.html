@@ -1,0 +1,9 @@
+<h1>{{ paragraph.title }}</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="/notes/{{ note.id }}/{{ paragraph.id }}/commit" method="post">
+{% csrf_token %}
+<input type="text" name="content" value="{{ paragraph.text }}">
+<input type="submit" value="Submit" />
+</form>

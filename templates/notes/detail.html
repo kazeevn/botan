@@ -1,0 +1,8 @@
+<h1>{{ note.title }}</h1>
+<h3>{{ note.author }}</h3>
+<ul>
+  {% for paragraph in note.paragraph_set.all %}
+  <li><a href="/notes/{{ note.id }}/{{ paragraph.id }}/">{{ paragraph.text }}</a>
+  <a href="/notes/{{ note.id }}/{{ paragraph.id }}/edit">Edit</a></li>
+  {% endfor %}
+</ul>
