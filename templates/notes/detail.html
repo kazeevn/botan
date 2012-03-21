@@ -11,11 +11,11 @@
 
 {% for paragraph in note.paragraph_set.all %}
 <h5>{{ paragraph.title }}</h5>
-{{ paragraph.text }}
+{{ paragraph.rendered|safe }}
 <a href="/notes/{{ note.id }}/{{ paragraph.id }}/edit">Edit</a>
 <br>
+{% endfor %}
 <!--- TODO(kazeevn) implement proper creation --->
 <a href="/notes/{{ note.id }}/0/edit">Add</a>
-{% endfor %}
 </body>
 </html>

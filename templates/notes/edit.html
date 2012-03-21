@@ -1,9 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+</head>
+<body>
 <h1>{{ paragraph.title }}</h1>
-
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{{ paragraph.rendered|safe }}
 
 <form action="/notes/{{ note_id }}/{{ par_id }}/commit/" method="post">
 {% csrf_token %}
 {{ form.as_p }}
 <input type="submit" value="Submit" />
 </form>
+</body>

@@ -30,6 +30,7 @@ def paragraph_edit(request, note_id, par_id):
       })
 
   return render_to_response('notes/edit.html', {'form': form,
+      'paragraph':p,
       'note_id':note_id,
       'par_id':par_id
       })
@@ -47,8 +48,8 @@ def commit(request, note_id, par_id):
       p.text = form.cleaned_data['text']
       p.title = form.cleaned_data['title']
       p.last_edit = datetime.datetime.now()
+      p.render()
       p.save()
-      #TODO(kazeevn) add last_edit
       return HttpResponseRedirect(reverse('notes.views.detail', args=(n.id,)))
     else:
       return render_to_response('notes/edit.html', {
