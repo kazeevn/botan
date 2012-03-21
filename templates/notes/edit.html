@@ -2,8 +2,8 @@
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-<form action="/notes/{{ note.id }}/{{ paragraph.id }}/commit" method="post">
+<form action="/notes/{{ note_id }}/{{ par_id }}/commit/" method="post">
 {% csrf_token %}
-<input type="text" name="content" value="{{ paragraph.text }}">
+{{ form.as_p }}
 <input type="submit" value="Submit" />
 </form>
