@@ -1,0 +1,1 @@
+../../../../share/pyshared/creoleparser/dialects.py
