@@ -1,21 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
+  <title>{{ note.title }}</title>
+  <meta name="author" content="{{ note.author }}">
+  <link href="/assets/css/bootstrap.css" rel="stylesheet">
+  <style type="text/css">
+    body {
+      padding-top: 60px;
+      padding-bottom: 40px;
+      }
+  </style>
   <script type="text/javascript"
   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
    </script>
 </head>
 <body>
-<h1>{{ note.title }}</h1>
-<h3>{{ note.author }}</h3>
+<div class="navbar navbar-fixed-top">
+ <div class="navbar-inner">
+    <div class="container">
+      <ul class='nav'>
+        <li>
+          <a class="brand" href="http://code.google.com/p/botan/"> Brain Overflow</a>
+        </li>
+        <li>
+        <ul class="breadcrumb">
+          <li><a href = "/notes/">Notes</a><span class="divider">/</span></li>
+          <li>
+            <a href = "/notes/{{ note.id}}">{{ note.title }}</a>
+            <span class="divider">/</span>
+          </li>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
 
-{% for paragraph in note.paragraph_set.all %}
-<h5>{{ paragraph.title }}</h5>
-{{ paragraph.rendered|safe }}
-<a href="/notes/{{ note.id }}/{{ paragraph.id }}/edit">Edit</a>
-<br>
-{% endfor %}
-<!--- TODO(kazeevn) implement proper creation --->
-<a href="/notes/{{ note.id }}/0/edit">Add</a>
+<div class="container">
+  <div class="row">
+    <div align="center" class="span12">
+      <h1>{{ note.title }}</h1>
+    </div>
+  </div>
+  {% for paragraph in note.paragraph_set.all %}
+  <div class="row">
+    <div class="span6">
+      <h5>{{ paragraph.title }}</h5>
+      {{ paragraph.rendered|safe }}
+    </div>
+    <div class="span6">
+      <h5>{{ paragraph.title }}</h5>
+    </div>
+    <div class="span6">
+    <form action="/notes/{{ note.id }}/{{ paragraph.id }}/commit/" method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input class="span5" type="text" name="title" value="{{ paragraph.title }}">
+      <input class="btn" type="submit" value="Submit" />
+      <textarea class="span6" name="text">{{ paragraph.text }}</textarea>
+    </form>
+  </div>
+  </div>
+  {% endfor %}
+  <!--- TODO(kazeevn) implement proper creation --->
+  <a href="/notes/{{ note.id }}/0/edit">Add</a>
+  <footer>
+    <p>&copy; {{ note.author}}</p>
+  </footer>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+<!--- TODO(kazeevn) split bootstrap and load only the needed parts --->
+<script src="/assets/js/bootstrap.js"></script>
 </body>
 </html>

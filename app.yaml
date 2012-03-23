@@ -14,3 +14,7 @@ libraries:
 
 builtins:
 - django_wsgi: on
+
+handlers:
+- url: /assets
+  static_dir: assets

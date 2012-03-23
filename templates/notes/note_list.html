@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Our notes</title>
+  <link href="/assets/css/bootstrap.css" rel="stylesheet">
+  <style type="text/css">
+    body {
+      padding-top: 60px;
+      padding-bottom: 40px;
+      }
+  </style>
+</head>
+<body>
+<div class="navbar navbar-fixed-top">
+ <div class="navbar-inner">
+    <div class="container">
+      <ul class='nav'>
+        <li>
+          <a class="brand" href="http://code.google.com/p/botan/"> Brain Overflow</a>
+        </li>
+        <li>
+        <ul class="breadcrumb">
+          <li><a href = "/notes/">Notes</a><span class="divider">/</span></li>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% if notes_list %}
+    <ul>
+    {% for note in notes_list %}
+      <li><a href="/notes/{{ note.id }}/">{{ note.title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+<p>No notes. Go and create one!</p>
+{% endif %}
+
+</body>
+</html>
+
