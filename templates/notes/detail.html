@@ -58,6 +58,7 @@
       <input class="span5" type="text" name="title" value="{{ paragraph.title }}">
       <input class="btn" type="submit" value="Submit" />
       <textarea class="span6" name="text">{{ paragraph.text }}</textarea>
+
     </form>
   </div>
   </div>
@@ -72,5 +73,10 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
 <!--- TODO(kazeevn) split bootstrap and load only the needed parts --->
 <script src="/assets/js/bootstrap.js"></script>
+<script src="/assets/js/jquery.autogrow-textarea.js"></script>
+<script type='text/javascript'>
+  $(function() {$('textarea').autogrow();});
+</script>
+
 </body>
 </html>
