@@ -9,7 +9,8 @@ urlpatterns = patterns('notes.views',
         context_object_name="notes_list"
         )),
     url(r'^(?P<note_id>\d+)/$', 'detail'),
-    url(r'^(?P<note_id>\d+)/(?P<par_id>\d+)/$', 'paragraph'),
+    url(r'^(?P<note_id>\d+)/(?P<par_id>\d+)/text$', 'paragraph_text'),
+    url(r'^(?P<note_id>\d+)/(?P<par_id>\d+)/rendered$', 'paragraph_rendered'),
     url(r'^(?P<note_id>\d+)/(?P<par_id>\d+)/edit/$', 'paragraph_edit'),
     url(r'^(?P<note_id>\d+)/(?P<par_id>\d+)/commit/$', 'commit'),
     )

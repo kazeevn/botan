@@ -9,8 +9,11 @@ def detail(request, note_id):
   n = get_object_or_404(Note, pk=note_id)
   return render_to_response('notes/detail.html', {'note': n})
 
-def paragraph(request, note_id, par_id):
-  return HttpResponse("Note %s, paragraph %s" % (note_id, par_id))
+def paragraph_text(request, note_id, par_id):
+  return HttpResponse(paragraph.text)
+
+def paragraph_rendered(request, note_id, par_id):
+  return HttpResponse(paragraph.rendered)
 
 def paragraph_edit(request, note_id, par_id):
   n = get_object_or_404(Note, pk=note_id)

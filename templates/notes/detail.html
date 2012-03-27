@@ -13,7 +13,14 @@
   </style>
   <script type="text/javascript"
   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-   </script>
+  </script>
+  <script type="text/javascript">
+  function closeEditor(par_id)
+  {
+    document.getElementById("view_"+par_id).className="span11";
+    document.getElementById("edit_"+par_id).style.display = 'none';;
+  }
+  </script>
 </head>
 <body>
 <div class="navbar navbar-fixed-top">
@@ -44,21 +51,21 @@
   </div>
   {% for paragraph in note.paragraph_set.all %}
   <div class="row">
-    <div class="span6">
+    <div class="span6" id="view_{{ paragraph.id }}">
       <h5>{{ paragraph.title }}</h5>
+      <button class="btn" data-toggle="btn_edit_{{ paragraph.id }}" onclick="closeEditor('{{ paragraph.id }}')">
+        Edit
+      </button>
       {{ paragraph.rendered|safe }}
     </div>
-    <div class="span6">
-      <h5>{{ paragraph.title }}</h5>
-    </div>
-    <div class="span6">
+    <div class="span6 collapse in", id="edit_{{ paragraph.id }}">
+    <h5>{{ paragraph.title }}</h5>
     <form action="/notes/{{ note.id }}/{{ paragraph.id }}/commit/" method="post">
       {% csrf_token %}
       {{ form.as_p }}
       <input class="span5" type="text" name="title" value="{{ paragraph.title }}">
       <input class="btn" type="submit" value="Submit" />
       <textarea class="span6" name="text">{{ paragraph.text }}</textarea>
-
     </form>
   </div>
   </div>
