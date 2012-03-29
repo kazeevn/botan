@@ -9,11 +9,31 @@ def detail(request, note_id):
   n = get_object_or_404(Note, pk=note_id)
   return render_to_response('notes/detail.html', {'note': n})
 
+def preview(request):
+  if request.method == 'POST':
+    form = Paragraph.EditForm(request.POST)
+    if form.is_valid():
+      p = Paragraph()
+      p.text = form.cleaned_data['text']
+      p.title = form.cleaned_data['title']
+      p.last_edit = datetime.datetime.now()
+      p.render()
+      return HttpResponse(p.rendered)
+    else:
+      return HttpResponse("Incorrect input")
+  else:
+    return HttpResponse("I eat only POST")
+
+
 def paragraph_text(request, note_id, par_id):
-  return HttpResponse(paragraph.text)
+  n = get_object_or_404(Note, pk=note_id)
+  p = get_object_or_404(Note, pk=par_id)
+  return HttpResponse(p.text)
 
 def paragraph_rendered(request, note_id, par_id):
-  return HttpResponse(paragraph.rendered)
+  n = get_object_or_404(Note, pk=note_id)
+  p = get_object_or_404(Note, pk=par_id)
+  return HttpResponse(p.rendered)
 
 def paragraph_edit(request, note_id, par_id):
   n = get_object_or_404(Note, pk=note_id)
@@ -53,7 +73,7 @@ def commit(request, note_id, par_id):
       p.last_edit = datetime.datetime.now()
       p.render()
       p.save()
-      return HttpResponseRedirect(reverse('notes.views.detail', args=(n.id,)))
+      return HttpResponse(p.rendered)
     else:
       return render_to_response('notes/edit.html', {
           'error_message': "Please make your edit correct",
@@ -68,5 +88,3 @@ def commit(request, note_id, par_id):
         'note_id':note_id,
         'par_id':par_id
         })
-
-

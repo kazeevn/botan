@@ -14,11 +14,51 @@
   <script type="text/javascript"
   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
   </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+  <script src="http://malsup.github.com/jquery.form.js"></script>
   <script type="text/javascript">
-  function closeEditor(par_id)
+  $(document).ready(function() {
+    {% for par in note.paragraph_set.all %}
+      $("#form_{{ par.id }}").ajaxForm();
+    {% endfor %}
+  });
+  function OpenView(par_id)
   {
-    document.getElementById("view_"+par_id).className="span11";
-    document.getElementById("edit_"+par_id).style.display = 'none';;
+    document.getElementById("view_"+par_id).className="span12";
+    document.getElementById("preview_"+par_id).style.display = 'none';
+    document.getElementById("edit_"+par_id).style.display = 'none';
+  };
+  function OpenEditor(par_id)
+  {
+    document.getElementById("view_"+par_id).className="span6";
+    document.getElementById("preview_"+par_id).style.display = 'none';
+    document.getElementById("edit_"+par_id).style.display = 'inline';
+  };
+  function OpenPreview(par_id)
+  {
+    var options = {
+      target: "#preview_"+par_id,
+      url: "{% url notes.views.preview %}",
+      success: function() {
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub,"preview_"+par_id]);
+      }};
+    $("#form_"+par_id).ajaxSubmit(options);
+    document.getElementById("view_"+par_id).className="span6";
+    document.getElementById("preview_"+par_id).className="span6";
+    document.getElementById("preview_"+par_id).style.display = 'inline';
+    document.getElementById("edit_"+par_id).style.display = 'none';
+    document.getElementById("preview_"+par_id).style.display = 'inline';
+    return false;
+  };
+  function Commit(par_id)
+  {
+    var options = {
+      target: "#view_"+par_id,
+      success: function() {
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub,"preview_"+par_id]);
+      }};
+    $("#form_"+par_id).ajaxSubmit(options);
+    OpenView(par_id);
   }
   </script>
 </head>
@@ -51,20 +91,34 @@
   </div>
   {% for paragraph in note.paragraph_set.all %}
   <div class="row">
-    <div class="span6" id="view_{{ paragraph.id }}">
+    <div class="row">
+    <div class="span4">
       <h5>{{ paragraph.title }}</h5>
-      <button class="btn" data-toggle="btn_edit_{{ paragraph.id }}" onclick="closeEditor('{{ paragraph.id }}')">
-        Edit
-      </button>
+    </div>
+      <div class="btn-group span5" data-toggle="buttons-radio">
+        <button class="btn active"
+          onclick="OpenView('{{ paragraph.id }}')">
+          View</button>
+        <button class="btn" 
+          onclick="OpenEditor('{{ paragraph.id }}')">
+          Edit</button>
+        <button class="btn"
+          onclick="OpenPreview('{{ paragraph.id }}')">
+          Preview</button>
+        <button class="btn"
+          onclick="Commit('{{ paragraph.id }}')">
+          Commit</button>
+      </div>
+    </div>
+    <div class="span12" id="view_{{ paragraph.id }}">
       {{ paragraph.rendered|safe }}
     </div>
-    <div class="span6 collapse in", id="edit_{{ paragraph.id }}">
-    <h5>{{ paragraph.title }}</h5>
-    <form action="/notes/{{ note.id }}/{{ paragraph.id }}/commit/" method="post">
+    <div id="preview_{{ paragraph.id }}"></div>
+    <div class="span6" style="display: none" id="edit_{{ paragraph.id }}">
+    <form id="form_{{ paragraph.id }}"
+      action="/notes/{{ note.id }}/{{ paragraph.id }}/commit/" method="post">
       {% csrf_token %}
-      {{ form.as_p }}
-      <input class="span5" type="text" name="title" value="{{ paragraph.title }}">
-      <input class="btn" type="submit" value="Submit" />
+      <input class="span6" type="text" name="title" value="{{ paragraph.title }}">
       <textarea class="span6" name="text">{{ paragraph.text }}</textarea>
     </form>
   </div>
@@ -77,7 +131,6 @@
   </footer>
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
 <!--- TODO(kazeevn) split bootstrap and load only the needed parts --->
 <script src="/assets/js/bootstrap.js"></script>
 <script src="/assets/js/jquery.autogrow-textarea.js"></script>
