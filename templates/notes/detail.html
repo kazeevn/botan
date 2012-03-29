@@ -55,7 +55,7 @@
     var options = {
       target: "#view_"+par_id,
       success: function() {
-        MathJax.Hub.Queue(["Typeset",MathJax.Hub,"preview_"+par_id]);
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub,"view_"+par_id]);
       }};
     $("#form_"+par_id).ajaxSubmit(options);
     OpenView(par_id);
