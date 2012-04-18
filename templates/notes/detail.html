@@ -22,6 +22,11 @@
       $("#form_{{ par.id }}").ajaxForm();
     {% endfor %}
   });
+  function ToogleImage(par_id)
+  {
+    $("#image_"+par_id).attr("src", document.location+par_id+"/image");
+    OpenView(par_id);
+  };
   function OpenView(par_id)
   {
     document.getElementById("view_"+par_id).className="span12";
@@ -99,6 +104,9 @@
         <button class="btn active"
           onclick="OpenView('{{ paragraph.id }}')">
           View</button>
+        <button class="btn"
+          onclick="ToogleImage('{{ paragraph.id }}')">
+          Image</button>
         <button class="btn" 
           onclick="OpenEditor('{{ paragraph.id }}')">
           Edit</button>
@@ -112,6 +120,7 @@
     </div>
     <div class="span12" id="view_{{ paragraph.id }}">
       {{ paragraph.rendered|safe }}
+      <img id="image_{{ paragraph.id }}" src="" width="940px">
     </div>
     <div id="preview_{{ paragraph.id }}"></div>
     <div class="span6" style="display: none" id="edit_{{ paragraph.id }}">

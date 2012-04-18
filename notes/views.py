@@ -18,7 +18,7 @@ def detail(request, note_id):
 def serve_image(request, note_id, par_id):
   p = get_object_or_404(Paragraph, pk=par_id)
 #  import pdb; pdb.set_trace();
-  response = HttpResponse("Sorry, our data storage has collapsed.")
+  response = HttpResponse("No image")
   response[blobstore.BLOB_KEY_HEADER] = p.blob_key
   response['Content-Type'] = ''
   return response
