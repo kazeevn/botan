@@ -16,6 +16,9 @@ class Paragraph(models.Model):
   rendered = models.CharField(max_length = 2000)
   text = models.CharField(max_length = 2000)
   last_edit = models.DateTimeField('last edit')
+  blob_key = models.CharField(max_length = 80)
+  #TODO(kazeevn) chack actual max_length
+
   #TODO(kazeevn) add creation time
   #TODO(kazeevn) add proper constructor
 
@@ -35,4 +38,5 @@ class Paragraph(models.Model):
     title = forms.CharField(max_length=100)
     text = forms.CharField(max_length=2000, widget=forms.Textarea)
 
-
+class UploadForm(forms.Form):
+  fil = forms.FileField()
