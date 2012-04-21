@@ -3,7 +3,7 @@ from django import forms
 from creoleparser import text2html
 
 class Note(models.Model):
-  title = models.CharField(max_length = 100)
+  title = models.CharField(max_length = 200)
   author = models.CharField(max_length = 100)
   last_edit = models.DateTimeField('last edit')
   def __unicode__(self):
@@ -11,12 +11,12 @@ class Note(models.Model):
 
 class Paragraph(models.Model):
   is_rendered = False
-  title = models.CharField(max_length = 100)
+  title = models.CharField(max_length = 200)
   note = models.ForeignKey(Note)
-  rendered = models.CharField(max_length = 2000)
-  text = models.CharField(max_length = 2000)
+  rendered = models.TextField(max_length = 2000)
+  text = models.TextField(max_length = 2000)
   last_edit = models.DateTimeField('last edit')
-  blob_key = models.CharField(max_length = 80)
+  blob_key = models.CharField(max_length = 256)
   #TODO(kazeevn) chack actual max_length
 
   #TODO(kazeevn) add creation time

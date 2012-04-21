@@ -63,8 +63,14 @@
         MathJax.Hub.Queue(["Typeset",MathJax.Hub,"view_"+par_id]);
       }};
     $("#form_"+par_id).ajaxSubmit(options);
+    if (par_id=="add") {
+      location.replace("/notes/{{ note.id }}/")
+    };
     OpenView(par_id);
-  }
+  };
+  function AddPar() {
+    $("#add").css('display', 'inline')
+  };
   </script>
 </head>
 <body>
@@ -79,7 +85,7 @@
         <ul class="breadcrumb">
           <li><a href = "/notes/">Notes</a><span class="divider">/</span></li>
           <li>
-            <a href = "/notes/{{ note.id}}">{{ note.title }}</a>
+            <a href = "/notes/{{ note.id }}">{{ note.title }}</a>
             <span class="divider">/</span>
           </li>
         </li>
@@ -133,8 +139,41 @@
   </div>
   </div>
   {% endfor %}
-  <!--- TODO(kazeevn) implement proper creation --->
-  <a href="/notes/{{ note.id }}/0/edit">Add</a>
+  <button class="btn" onclick="AddPar()">Add</button>
+  <div class="row" style="display: none" id="add">
+    <div class="row">
+    <div class="span4">
+      <h5>Add here</h5>
+    </div>
+      <div class="btn-group span5" data-toggle="buttons-radio">
+        <button class="btn active"
+          onclick="OpenView('add')">
+          View</button>
+        <button class="btn" 
+          onclick="OpenEditor('add')">
+          Edit</button>
+        <button class="btn"
+          onclick="OpenPreview('add')">
+          Preview</button>
+        <button class="btn"
+          onclick="Commit('add')">
+          Commit</button>
+      </div>
+    </div>
+    <div class="span12" id="view_add">
+      <img id="image_add" src="" width="940px">
+    </div>
+    <div id="preview_add"></div>
+    <div class="span6" style="display: none" id="edit_add">
+    <form id="form_add"
+      action="/notes/{{ note.id }}/add/" method="post">
+      {% csrf_token %}
+      <input class="span6" type="text" name="title" value="">
+      <textarea class="span6" name="text"></textarea>
+    </form>
+  </div>
+
+  </div>
   <footer>
     <p>&copy; {{ note.author}}</p>
   </footer>
