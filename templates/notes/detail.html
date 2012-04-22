@@ -76,6 +76,7 @@ function OpenView(par_id)
 };
 function OpenEditor(par_id)
 {
+    Preview(par_id);
     document.getElementById("view_"+par_id).style.display="none";
     document.getElementById("preview_"+par_id).style.display = 'inline';
     document.getElementById("edit_"+par_id).style.display = 'inline';
@@ -99,7 +100,8 @@ function Commit(par_id)
     $("#form_"+par_id).ajaxSubmit(options);
 
    if (par_id=="add") {
-	location.replace("/notes/{{ note.id }}/")
+     setTimeout(function() {
+         location.replace("/notes/{{ note.id }}/");}, 700);
     };
     OpenView(par_id);
 };
