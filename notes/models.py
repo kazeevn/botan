@@ -13,8 +13,8 @@ class Paragraph(models.Model):
   is_rendered = False
   title = models.CharField(max_length = 200)
   note = models.ForeignKey(Note)
-  rendered = models.TextField(max_length = 2000)
-  text = models.TextField(max_length = 2000)
+  rendered = models.TextField(max_length = 10000)
+  text = models.TextField(max_length = 10000)
   last_edit = models.DateTimeField('last edit')
   blob_key = models.CharField(max_length = 256)
   #TODO(kazeevn) chack actual max_length
