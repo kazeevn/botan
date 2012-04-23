@@ -7,7 +7,7 @@ urlpatterns = patterns('notes.views',
     url(r'^$', ListView.as_view(
         model=Note,
         context_object_name="notes_list"
-        )),
+        ), name='notes_root'),
     url(r'^(?P<pk>\d+)/$', DetailView.as_view(
         model=Note,
         template_name='notes/detail.html'
@@ -19,4 +19,5 @@ urlpatterns = patterns('notes.views',
     url(r'^(?P<note_id>\d+)/(?P<par_id>\d+)/rendered$', 'paragraph_rendered'),
     url(r'^(?P<note_id>\d+)/(?P<par_id>\d+)/commit/$', 'commit'),
     url(r'^(?P<note_id>\d+)/add/$', 'add'),
+    url(r'^add/$', 'add_note'),
     )

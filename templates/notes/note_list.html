@@ -28,6 +28,8 @@
   </div>
 </div>
 
+<div class="container">
+<div class="row">
 {% if notes_list %}
     <ul>
     {% for note in notes_list %}
@@ -37,6 +39,15 @@
 {% else %}
 <p>No notes. Go and create one!</p>
 {% endif %}
+</div>
+<div class="row">
+<form class="well form-inline" action="{% url notes.views.add_note %}" method="post">
+  <input type="submit" class="btn span2" value="Add">
+  <input type="text" name="title" class="span6" placeholder="Title">
+  <input type="text" name="author" class="span4" placeholder="Author">
+</form>
+</div>
+</div>
 
 </body>
 </html>

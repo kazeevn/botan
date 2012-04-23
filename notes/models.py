@@ -9,6 +9,10 @@ class Note(models.Model):
   def __unicode__(self):
     return self.title
 
+  class AddForm(forms.Form):
+    title = forms.CharField(max_length=200)
+    author = forms.CharField(max_length = 100)
+
 class Paragraph(models.Model):
   is_rendered = False
   title = models.CharField(max_length = 200)
@@ -35,8 +39,8 @@ class Paragraph(models.Model):
     return self.text
 
   class EditForm(forms.Form):
-    title = forms.CharField(max_length=100)
-    text = forms.CharField(max_length=2000, widget=forms.Textarea)
+    title = forms.CharField(max_length=200)
+    text = forms.CharField(max_length=10000, widget=forms.Textarea)
 
 class UploadForm(forms.Form):
   fil = forms.FileField()

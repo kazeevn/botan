@@ -103,6 +103,22 @@ def add(request, note_id):
   else:
     return HttpResponseForbidden("POST, please!")
 
+def add_note(request):
+  if request.method == 'POST':
+    form = Note.AddForm(request.POST)
+    if form.is_valid():
+      n = Note()
+      n.author = form.cleaned_data['author']
+      n.title = form.cleaned_data['title']
+      n.last_edit = datetime.datetime.now()
+      n.save()
+      return HttpResponseRedirect(reverse('notes_root'))
+    else:
+      return HttpResponseForbidden("Invalid data.")
+  else:
+    return HttpResponseForbidden("POST, please!")
+
+
 def commit(request, note_id, par_id):
   n = get_object_or_404(Note, pk=note_id)
   if request.method == 'POST':
