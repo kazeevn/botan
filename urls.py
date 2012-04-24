@@ -1,10 +1,12 @@
 from django.conf.urls.defaults import patterns, include, handler404, handler500, url
 from django.conf import settings
+from django.http import HttpResponseRedirect
 
 from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r'^$',lambda x: HttpResponseRedirect('notes/')),
     (r'%s' % settings.ASKBOT_URL, include('askbot.urls')),
     (r'^notes/', include('notes.urls')),
     (r'^admin/', include(admin.site.urls)),
