@@ -51,14 +51,18 @@
 	    $("#form_"+par_id).find("textarea,:text").each(function(i, e) {
 		UpdatePreview(e)});
 	});
-	$('.tabbable').on('shown', '.compare_tab', function(e) {
+	$('.tabbable').on('shown', '.link_compare', function(e) {
 	    var par_id = GetParId(e.target);
 	    Compare(par_id);
 	});
-
 	$('#main').bind('keyup paste change', function(e) {
 	    UpdatePreview(e.srcElement);
 	});
+	$('.link_view').data("content", "View the paragraph in its current form.");
+	$('.link_edit').data("content", "Make the paragraph better by editing it.");
+	$('.link_compare').data("content", "See the changes you've just made, commit or undo them.");
+	$('.link_view,.link_edit,.link_compare').data("title", "What's that?");
+	$('.link_view,.link_edit,.link_compare').popover();
     });
 
 // Gets NOT a jquery object
@@ -183,17 +187,17 @@ function AddPar() {
 	</div>
       </div>
       {% for paragraph in note.paragraph_set.all %}
-    <div class="row" data-par-id="{{ paragraph.id }}">
+      <div class="row" data-par-id="{{ paragraph.id }}">
 	<div class="row">
 	  <h3>{{ paragraph.title }}</h3>
 	  <div class="tabbable" id="tabbable_{{ paragraph.id}}">
 	    <ul class="nav nav-tabs" data-par-id="{{ paragraph.id }}">
 	      <li class="active link_view"><a href="#view_{{ paragraph.id }}"
-				    data-toggle="tab">View</a></li>
-    <li class="link_edit"><a class="link_edit",
-href="#edit_{{ paragraph.id }}" data-toggle="tab">Edit</a></li>
-    <li><a class="compare_tab",
-href="#tab_compare_{{ paragraph.id }}" data-toggle="tab">Compare & Commit || Reset</a></li>
+					      data-toggle="tab">View</a></li>
+	      <li class="link_edit"><a class="link_edit",
+				       href="#edit_{{ paragraph.id }}" data-toggle="tab">Edit</a></li>
+	      <li><a class="link_compare",
+		     href="#tab_compare_{{ paragraph.id }}" data-toggle="tab">Compare & Commit || Reset</a></li>
 	    </ul>
 	    <div class="tab-content">
 	      <div class="tab-pane active" id="view_{{ paragraph.id }}">
@@ -213,7 +217,7 @@ href="#tab_compare_{{ paragraph.id }}" data-toggle="tab">Compare & Commit || Res
    		    <textarea class="span6" name="text">{{ paragraph.text }}</textarea>
 		  </div>
 		</form>
-		</div>
+	      </div>
 	      <div class="tab-pane" id="tab_compare_{{ paragraph.id }}">
 		<div class="row well form-inline span12">
 		  <button class="btn" onclick="ResetEdit('{{ paragraph.id }}')">Reset edit</button>
@@ -224,43 +228,43 @@ href="#tab_compare_{{ paragraph.id }}" data-toggle="tab">Compare & Commit || Res
 	    </div>
 	  </div>
 	</div>
-       </div>
+      </div>
       {% endfor %}
-    <div class="row" data-par-id="add">
-      <div class="row">
-	<h3>Add New</h3>
-	<div class="tabbable" id="tabbable_add">
-	  <ul class="nav nav-tabs" data-par-id="add">
-	    <li class="active link_edit"><a class="link_edit",
-					    href="#edit_add" data-toggle="tab">Edit</a></li>
-	    <li><a class="compare_tab",
-		   href="#tab_compare_add" data-toggle="tab">Commit || Reset</a></li>
-	  </ul>
-	  <div class="tab-content">
-	    <div class="tab-pane active" id="edit_add">
-	      <form id="form_add" class="form-horizontal span12"
-		    action="/notes/{{ note.id }}/add/" method="post">
-		{% csrf_token %}
-		<div class="row">
-		  <div class="span6" id="title_add">&nbsp</div>
-		  <input class="span6" type="text" name="title" placeholder="Title">
+      <div class="row" data-par-id="add">
+	<div class="row">
+	  <h3>Add New</h3>
+	  <div class="tabbable" id="tabbable_add">
+	    <ul class="nav nav-tabs" data-par-id="add">
+	      <li class="active link_edit"><a class="link_edit",
+					      href="#edit_add" data-toggle="tab">Edit</a></li>
+	      <li><a class="link_compare",
+		     href="#tab_compare_add" data-toggle="tab">Commit || Reset</a></li>
+	    </ul>
+	    <div class="tab-content">
+	      <div class="tab-pane active" id="edit_add">
+		<form id="form_add" class="form-horizontal span12"
+		      action="/notes/{{ note.id }}/add/" method="post">
+		  {% csrf_token %}
+		  <div class="row">
+		    <div class="span6" id="title_add">&nbsp</div>
+		    <input class="span6" type="text" name="title" placeholder="Title">
+		  </div>
+		  <div class="row">
+		    <div class="span6" id="preview_add">&nbsp</div>
+   		    <textarea class="span6" name="text" placeholder="Body"></textarea>
+		  </div>
+		</form>
+	      </div>
+	      <div class="tab-pane" id="tab_compare_add">
+		<div class="row well form-inline">
+		  <button class="btn" onclick="ResetEdit('add')">Reset edit</button>
+		  <button class="btn" onclick="Commit('add')">Commit</button>
 		</div>
-		<div class="row">
-		  <div class="span6" id="preview_add">&nbsp</div>
-   		  <textarea class="span6" name="text" placeholder="Body"></textarea>
-		</div>
-	      </form>
-	    </div>
-	    <div class="tab-pane" id="tab_compare_add">
-	      <div class="row well form-inline">
-		<button class="btn" onclick="ResetEdit('add')">Reset edit</button>
-		<button class="btn" onclick="Commit('add')">Commit</button>
 	      </div>
 	    </div>
 	  </div>
 	</div>
       </div>
-    </div>
 
       <footer>
 	<p>&copy; {{ note.author}}</p>
