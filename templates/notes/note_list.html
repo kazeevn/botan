@@ -10,6 +10,32 @@
       padding-bottom: 40px;
       }
   </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+  <script src="http://malsup.github.com/jquery.form.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+	$("#form_add").ajaxForm({ beforeSubmit: validate, success:amend_list });
+    });
+function validate(formData, jqForm, options) {
+    for (var i=0; i < formData.length; i++) {
+	if (!formData[i].value) {
+	    newAlert('alert-error', 'Your data is wrong. Most likely, you just have left an empty field.');
+            return false;
+        }
+    }
+    $(".alert").alert('close');
+    return true;
+}
+function amend_list(responseText, statusText, xhr, $form)  {
+    $("#notes_list").append(responseText);
+}
+function newAlert (type, message) {
+    $("#alert-place").append($(
+	"<div class='alert " + type +
+	    " fade in' data-alert><button class='close' data-dismiss='alert'>×</button>"
+	    +message+"</div>"));
+}
+  </script>
 </head>
 <body>
 <div class="navbar navbar-fixed-top">
@@ -31,7 +57,7 @@
 <div class="container">
 <div class="row">
 {% if notes_list %}
-    <ul>
+    <ul id="notes_list">
     {% for note in notes_list %}
       <li><a href="/notes/{{ note.id }}/">{{ note.title }}</a></li>
     {% endfor %}
@@ -40,15 +66,17 @@
 <p>No notes. Go and create one!</p>
 {% endif %}
 </div>
+<div id="added_id"></div>
+<div id="alert-place"></div>
 <div class="row">
-<form class="well form-inline" action="{% url notes.views.add_note %}" method="post">
-  <input type="submit" class="btn span2" value="Add">
-  <input type="text" name="title" class="span6" placeholder="Title">
-  <input type="text" name="author" class="span4" placeholder="Author">
+<form class="well form-inline" action="{% url notes.views.add_note %}" method="post" id="form_add">
+  <input type="submit" class="btn span2" id="btn_add" value="Add">
+  <input type="text" name="title" class="span6" id="title" placeholder="Title">
+  <input type="text" name="author" class="span4" id="author" placeholder="Author">
 </form>
 </div>
 </div>
-
+<script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.0.3/bootstrap.min.js"></script>
 </body>
 </html>
 

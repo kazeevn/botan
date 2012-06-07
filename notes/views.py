@@ -112,7 +112,8 @@ def add_note(request):
       n.title = form.cleaned_data['title']
       n.last_edit = datetime.datetime.now()
       n.save()
-      return HttpResponseRedirect(reverse('notes_root'))
+      # TODO(kazeevn) redo it in a better style
+      return HttpResponse(r"<li><a href=/notes/{0}>{1}</a></li>".format(n.id, n.title))
     else:
       return HttpResponseForbidden("Invalid data.")
   else:

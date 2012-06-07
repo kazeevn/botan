@@ -61,8 +61,10 @@
 	$('.link_view').data("content", "View the paragraph in its current form.");
 	$('.link_edit').data("content", "Make the paragraph better by editing it.");
 	$('.link_compare').data("content", "See the changes you've just made, commit or undo them.");
-	$('.link_view,.link_edit,.link_compare').data("title", "What's that?");
-	$('.link_view,.link_edit,.link_compare').popover();
+	$('.btn_reset').data("content", "Undo your changes and restore original text.");
+	$('.btn_commit').data("content", "Save your changes for the others to see.");
+	$('.link_view,.link_edit,.link_compare,.btn_reset,.btn_commit').data("title", "What's that?");
+	$('.link_view,.link_edit,.link_compare,.btn_reset,.btn_commit').popover();
     });
 
 // Gets NOT a jquery object
@@ -220,8 +222,8 @@ function AddPar() {
 	      </div>
 	      <div class="tab-pane" id="tab_compare_{{ paragraph.id }}">
 		<div class="row well form-inline span12">
-		  <button class="btn" onclick="ResetEdit('{{ paragraph.id }}')">Reset edit</button>
-		  <button class="btn" onclick="Commit('{{ paragraph.id }}')">Commit</button>
+		  <button class="btn btn_reset" onclick="ResetEdit('{{ paragraph.id }}')">Reset edit</button>
+		  <button class="btn btn_commit" onclick="Commit('{{ paragraph.id }}')">Commit</button>
 		</div>
 		<div class="row span12" id="compare_{{ paragraph.id }}"></div>
 	      </div>
@@ -257,8 +259,8 @@ function AddPar() {
 	      </div>
 	      <div class="tab-pane" id="tab_compare_add">
 		<div class="row well form-inline">
-		  <button class="btn" onclick="ResetEdit('add')">Reset edit</button>
-		  <button class="btn" onclick="Commit('add')">Commit</button>
+		  <button class="btn btn_reset" onclick="ResetEdit('add')">Reset edit</button>
+		  <button class="btn btn_commit" onclick="Commit('add')">Commit</button>
 		</div>
 	      </div>
 	    </div>
@@ -271,8 +273,7 @@ function AddPar() {
       </footer>
     </div>
 
-    <!--- TODO(kazeevn) split bootstrap and load only the needed parts --->
-    <script src="/assets/js/bootstrap.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.0.3/bootstrap.min.js"></script>
     <script src="/assets/js/jquery.autogrow-textarea.js"></script>
     <script type='text/javascript'>
       $(function() {$('textarea').autogrow();});
