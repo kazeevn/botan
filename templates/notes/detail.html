@@ -127,7 +127,9 @@ function Commit(par_id)
 	setTimeout(function() {
             location.replace("/notes/{{ note.id }}/");}, 700);
     };
-    OpenView(par_id);
+    $("#tabbable_"+par_id).find(".tab-pane,li").removeClass("active");
+    $("#view_"+par_id).addClass("active");
+    $("#tabbable_"+par_id).find(".link_view").addClass("active in");
 };
 function AddPar() {
     $("#add").css('display', 'inline')
@@ -167,14 +169,14 @@ function AddPar() {
     <div class="row" data-par-id="{{ paragraph.id }}">
 	<div class="row">
 	  <h3>{{ paragraph.title }}</h3>
-	  <div class="tabbable">
+	  <div class="tabbable" id="tabbable_{{ paragraph.id}}">
 	    <ul class="nav nav-tabs" data-par-id="{{ paragraph.id }}">
-	      <li class="active"><a href="#view_{{ paragraph.id }}"
+	      <li class="active link_view"><a href="#view_{{ paragraph.id }}"
 				    data-toggle="tab">View</a></li>
     <li><a class="editor_tab",
 href="#edit_{{ paragraph.id }}" data-toggle="tab">Edit</a></li>
     <li><a class="compare_tab",
-href="#compare_{{ paragraph.id }}" data-toggle="tab">Compare</a></li>
+href="#tab_compare_{{ paragraph.id }}" data-toggle="tab">Compare & Commit</a></li>
 	    </ul>
 	    <div class="tab-content">
 	      <div class="tab-pane active" id="view_{{ paragraph.id }}">
@@ -195,11 +197,18 @@ href="#compare_{{ paragraph.id }}" data-toggle="tab">Compare</a></li>
 		  </div>
 		</form>
 		</div>
-	      <div class="tab-pane" id="compare_{{ paragraph.id }}"></div>
+	      <div class="tab-pane" id="tab_compare_{{ paragraph.id }}">
+		<div class="row well form-inline">
+		  <button class="btn" onclick="ResesEdit('{{ paragraph.id }}')">Reset edit</button>
+		  <button class="btn" onclick="Commit('{{ paragraph.id }}')">Commit</button>
+		</div>
+		<div class="row" id="compare_{{ paragraph.id }}"></div>
+	      </div>
 	    </div>
 	  </div>
-      </div>
+	</div>
       {% endfor %}
+
       <div class="row">
 	<div class="row">
 	  <div class="span4">
