@@ -66,16 +66,20 @@ function UpdatePreview(trigger) {
     var par_id = GetParId(trigger);
     if (trigger.name=="text") {
 	var target = document.getElementById("preview_"+par_id);
-	target.innerHTML="";
+	target.innerHTML="&nbsp";
 	creole.parse(target, trigger.value);
 	MathJax.Hub.Queue(["Typeset",MathJax.Hub,"preview_"+par_id]);
     } else if (trigger.name=="title") {
-	$("#title_"+par_id).html("<h3>"+trigger.value+"<h3>");
+	$("#title_"+par_id).html("<h3>"+trigger.value+"&nbsp<h3>");
     }
 }
 
 function ResetEdit(par_id) {
-    $("#form_"+par_id).find("textarea").val(orig_pars[par_id]);
+    if (par_id=="add") {
+	$("#form_"+par_id).find("textarea").val("");
+    } else {
+	$("#form_"+par_id).find("textarea").val(orig_pars[par_id]);
+    }
     // TODO(kazeevn) reset title as well
     //    $("#form_"+par_id).find("text[name=title]").val(orig_pars[par_id]);
     $("#tabbable_"+par_id).find(".tab-pane,li").removeClass("active");
@@ -137,7 +141,9 @@ function Commit(par_id)
     if (par_id=="add") {
 	setTimeout(function() {
             location.replace("/notes/{{ note.id }}/");}, 700);
-    };
+    } else {
+	  orig_pars[par_id]= $("#form_"+par_id).find("textarea[name=text]").val();
+	  }
     $("#tabbable_"+par_id).find(".tab-pane,li").removeClass("active");
     $("#view_"+par_id).addClass("active");
     $("#tabbable_"+par_id).find(".link_view").addClass("active in");
@@ -209,50 +215,53 @@ href="#tab_compare_{{ paragraph.id }}" data-toggle="tab">Compare & Commit || Res
 		</form>
 		</div>
 	      <div class="tab-pane" id="tab_compare_{{ paragraph.id }}">
-		<div class="row well form-inline">
+		<div class="row well form-inline span12">
 		  <button class="btn" onclick="ResetEdit('{{ paragraph.id }}')">Reset edit</button>
 		  <button class="btn" onclick="Commit('{{ paragraph.id }}')">Commit</button>
 		</div>
-		<div class="row" id="compare_{{ paragraph.id }}"></div>
+		<div class="row span12" id="compare_{{ paragraph.id }}"></div>
 	      </div>
 	    </div>
 	  </div>
 	</div>
+       </div>
       {% endfor %}
-
+    <div class="row" data-par-id="add">
       <div class="row">
-	<div class="row">
-	  <div class="span4">
-	    <h3>Add new</h3>
+	<h3>Add New</h3>
+	<div class="tabbable" id="tabbable_add">
+	  <ul class="nav nav-tabs" data-par-id="add">
+	    <li class="active link_edit"><a class="link_edit",
+					    href="#edit_add" data-toggle="tab">Edit</a></li>
+	    <li><a class="compare_tab",
+		   href="#tab_compare_add" data-toggle="tab">Commit || Reset</a></li>
+	  </ul>
+	  <div class="tab-content">
+	    <div class="tab-pane active" id="edit_add">
+	      <form id="form_add" class="form-horizontal span12"
+		    action="/notes/{{ note.id }}/add/" method="post">
+		{% csrf_token %}
+		<div class="row">
+		  <div class="span6" id="title_add">&nbsp</div>
+		  <input class="span6" type="text" name="title" placeholder="Title">
+		</div>
+		<div class="row">
+		  <div class="span6" id="preview_add">&nbsp</div>
+   		  <textarea class="span6" name="text" placeholder="Body"></textarea>
+		</div>
+	      </form>
+	    </div>
+	    <div class="tab-pane" id="tab_compare_add">
+	      <div class="row well form-inline">
+		<button class="btn" onclick="ResetEdit('add')">Reset edit</button>
+		<button class="btn" onclick="Commit('add')">Commit</button>
+	      </div>
+	    </div>
 	  </div>
-	  <div class="btn-group span5" data-toggle="buttons-radio">
-	    <button class="btn"
-		    onclick="OpenView('add')">
-	      View</button>
-	    <button class="btn active"
-		    onclick="OpenEditor('add')">
-	      Edit</button>
-	    <button class="btn"
-		    onclick="OpenPreview('add')">
-	      Preview</button>
-	    <button class="btn"
-		    onclick="Commit('add')">
-	      Commit</button>
-	  </div>
-	</div>
-	<div class="span12" id="view_add" style:"display: none">
-	  <img id="image_add" src="" width="940px">
-	</div>
-	<div class="span6" id="preview_add"></div>
-	<div class="span6" id="edit_add">
-	  <form id="form_add"
-		action="/notes/{{ note.id }}/add/" method="post">
-	    {% csrf_token %}
-	    <input class="span6" type="text" name="title" placeholder="Title">
-	    <textarea class="span6" name="text" Placeholder="Body"></textarea>
-	  </form>
 	</div>
       </div>
+    </div>
+
       <footer>
 	<p>&copy; {{ note.author}}</p>
       </footer>
