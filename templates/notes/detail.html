@@ -5,6 +5,7 @@
     <title>{{ note.title }}</title>
     <meta name="author" content="{{ note.author }}">
     <link href="/assets/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/assets/css/diffview.css"/>
     <style type="text/css">
       body {
       padding-top: 60px;
@@ -23,85 +24,108 @@
     <script type="text/javascript"
 	    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
     </script>
+    <script type="text/javascript" src="/assets/js/diff/diffview.js"></script>
+    <script src="/assets/js/diff/jsdiff.js"></script>
+    <script src="/assets/js/diff/difflib.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
     <script src="http://malsup.github.com/jquery.form.js"></script>
     <script type="text/javascript">
+    var creole;
+    var orig_pars = new Array(); //Holds unchanged text for diff and cancel
     $(document).ready(function() {
 	{% for par in note.paragraph_set.all %}
 	$("#form_{{ par.id }}").ajaxForm();
+	orig_pars[{{par.id}}] =  $("#form_"+{{ par.id }}).find("textarea").val();
 	{% endfor %}
-    OpenEditor("add");
-    var creole = new Parse.Simple.Creole( {
-    forIE: document.all,
-    interwiki: {
-    WikiCreole: 'http://www.wikicreole.org/wiki/',
-    Wikipedia: 'http://en.wikipedia.org/wiki/'
-    },
-    linkFormat: ''
-    } );
-    $('#main').bind('keyup paste change',
-    function(e)
-    {
-    var trigger = e.srcElement
-    var par_id = trigger.parentElement.id.slice(5);
-    var target = document.getElementById("preview_"+par_id);
-    target.innerHTML=""
-    creole.parse(target, trigger.value);
-    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"preview_"+par_id]);
-    });
+	// TODO initialise using ajax and on demand
+	creole = new Parse.Simple.Creole( {
+	    forIE: document.all,
+	    interwiki: {
+		WikiCreole: 'http://www.wikicreole.org/wiki/',
+		Wikipedia: 'http://en.wikipedia.org/wiki/'
+	    },
+	    linkFormat: ''
+	} );
+	$('.tabbable').on('shown', '.editor_tab', function(e) {
+	    var par_id = GetParId(e.target);
+	    $("#form_"+par_id).find("textarea,:text").each(function(i, e) {
+		UpdatePreview(e)});
+	});
+	$('.tabbable').on('shown', '.compare_tab', function(e) {
+	    var par_id = GetParId(e.target);
+	    Compare(par_id);
+	});
+
+	$('#main').bind('keyup paste change', function(e) {
+	    UpdatePreview(e.srcElement);
+	});
     });
 
-    function  Preview(par_id)
-    {
+// Gets NOT a jquery object
+function UpdatePreview(trigger) {
+    var par_id = GetParId(trigger);
+    if (trigger.name=="text") {
+	var target = document.getElementById("preview_"+par_id);
+	target.innerHTML="";
+	creole.parse(target, trigger.value);
+	MathJax.Hub.Queue(["Typeset",MathJax.Hub,"preview_"+par_id]);
+    } else if (trigger.name=="title") {
+	$("#title_"+par_id).html("<h3>"+trigger.value+"<h3>");
+    }
+}
+
+function GetParId(element) {
+    return $(element).parents("[data-par-id]").data("par-id");
+}
+
+function  Preview(par_id)
+{
     var options = {
-    target: "#preview_"+par_id,
-      url: "{% url notes.views.preview %}",
-      success: function() {
-        MathJax.Hub.Queue(["Typeset",MathJax.Hub,"preview_"+par_id]);
-      }};
+	target: "#preview_"+par_id,
+	url: "{% url notes.views.preview %}",
+	success: function() {
+            MathJax.Hub.Queue(["Typeset",MathJax.Hub,"preview_"+par_id]);
+	}};
     $("#form_"+par_id).ajaxSubmit(options);
 
 };
 function ToogleImage(par_id)
 {
     $("#image_"+par_id).attr("src", document.location+par_id+"/image");
-    OpenView(par_id);
 };
-function OpenView(par_id)
+
+function Compare(par_id)
 {
-    document.getElementById("view_"+par_id).className="span12";
-    document.getElementById("view_"+par_id).style.display="inline";
-    document.getElementById("preview_"+par_id).style.display = 'none';
-    document.getElementById("edit_"+par_id).style.display = 'none';
-};
-function OpenEditor(par_id)
-{
-    Preview(par_id);
-    document.getElementById("view_"+par_id).style.display="none";
-    document.getElementById("preview_"+par_id).style.display = 'inline';
-    document.getElementById("edit_"+par_id).style.display = 'inline';
-};
-function OpenPreview(par_id)
-{
-    Preview(par_id);
-    document.getElementById("view_"+par_id).style.display="inline";
-    document.getElementById("view_"+par_id).className="span6";
-    document.getElementById("preview_"+par_id).style.display = 'inline';
-    document.getElementById("edit_"+par_id).style.display = 'none';
-    return false;
+    var base = difflib.stringAsLines(orig_pars[par_id]);
+    var newtxt = difflib.stringAsLines($("#form_"+par_id).find("textarea").val());
+    var sm = new difflib.SequenceMatcher(base, newtxt);
+    var opcodes = sm.get_opcodes();
+    var diffoutputdiv = document.getElementById("compare_"+par_id);
+    while (diffoutputdiv.firstChild) diffoutputdiv.removeChild(diffoutputdiv.firstChild);
+    var contextSize = 3;
+    contextSize = contextSize ? contextSize : null;
+    diffoutputdiv.appendChild(diffview.buildView({ baseTextLines:base,
+						   newTextLines:newtxt,
+						   opcodes:opcodes,
+						   baseTextName:"Old",
+						   newTextName:"New",
+						   contextSize:contextSize,
+						   viewType: 0}));
+
+
 };
 function Commit(par_id)
 {
-        var options = {
+    var options = {
 	target: "#view_"+par_id,
 	success: function() {
 	    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"view_"+par_id]);
 	}};
     $("#form_"+par_id).ajaxSubmit(options);
 
-   if (par_id=="add") {
-     setTimeout(function() {
-         location.replace("/notes/{{ note.id }}/");}, 700);
+    if (par_id=="add") {
+	setTimeout(function() {
+            location.replace("/notes/{{ note.id }}/");}, 700);
     };
     OpenView(par_id);
 };
@@ -140,44 +164,40 @@ function AddPar() {
 	</div>
       </div>
       {% for paragraph in note.paragraph_set.all %}
-      <div class="row">
+    <div class="row" data-par-id="{{ paragraph.id }}">
 	<div class="row">
-	  <div class="span4">
-	    <h3>{{ paragraph.title }}</h3>
+	  <h3>{{ paragraph.title }}</h3>
+	  <div class="tabbable">
+	    <ul class="nav nav-tabs" data-par-id="{{ paragraph.id }}">
+	      <li class="active"><a href="#view_{{ paragraph.id }}"
+				    data-toggle="tab">View</a></li>
+    <li><a class="editor_tab",
+href="#edit_{{ paragraph.id }}" data-toggle="tab">Edit</a></li>
+    <li><a class="compare_tab",
+href="#compare_{{ paragraph.id }}" data-toggle="tab">Compare</a></li>
+	    </ul>
+	    <div class="tab-content">
+	      <div class="tab-pane active" id="view_{{ paragraph.id }}">
+		{{ paragraph.rendered|safe }}
+		<img id="image_{{ paragraph.id }}" src="" width="940px">
+	      </div>
+	      <div class="tab-pane" id="edit_{{ paragraph.id }}">
+		<form id="form_{{ paragraph.id }}" class="form-horizontal span12"
+		      action="/notes/{{ note.id }}/{{ paragraph.id }}/commit/" method="post">
+		  {% csrf_token %}
+		  <div class="row">
+		    <div class="span6" id="title_{{ paragraph.id }}">&nbsp</div>
+		    <input class="span6" type="text" name="title" value="{{ paragraph.title }}">
+		  </div>
+		  <div class="row">
+		    <div class="span6" id="preview_{{ paragraph.id }}">&nbsp</div>
+   		    <textarea class="span6" name="text">{{ paragraph.text }}</textarea>
+		  </div>
+		</form>
+		</div>
+	      <div class="tab-pane" id="compare_{{ paragraph.id }}"></div>
+	    </div>
 	  </div>
-	  <div class="btn-group span5" data-toggle="buttons-radio">
-	    <button class="btn active"
-		    onclick="OpenView('{{ paragraph.id }}')">
-	      View</button>
-	    {% comment %}
-	    <button class="btn"
-		    onclick="ToogleImage('{{ paragraph.id }}')">
-	      Image</button>
-	    {% endcomment %}
-	    <button class="btn"
-		    onclick="OpenEditor('{{ paragraph.id }}')">
-	      Edit</button>
-	    <button class="btn"
-		    onclick="OpenPreview('{{ paragraph.id }}')">
-	      Preview</button>
-	    <button class="btn"
-		    onclick="Commit('{{ paragraph.id }}')">
-	      Commit</button>
-	  </div>
-	</div>
-	<div class="span12" id="view_{{ paragraph.id }}">
-	  {{ paragraph.rendered|safe }}
-	  <img id="image_{{ paragraph.id }}" src="" width="940px">
-	</div>
-	<div class="span6" id="preview_{{ paragraph.id }}"></div>
-	<div class="span6" style="display: none" id="edit_{{ paragraph.id }}">
-	  <form id="form_{{ paragraph.id }}"
-		action="/notes/{{ note.id }}/{{ paragraph.id }}/commit/" method="post">
-	    {% csrf_token %}
-	    <input class="span6" type="text" name="title" value="{{ paragraph.title }}">
-	    <textarea class="span6" name="text">{{ paragraph.text }}</textarea>
-	  </form>
-	</div>
       </div>
       {% endfor %}
       <div class="row">
