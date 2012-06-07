@@ -46,7 +46,7 @@
 	    },
 	    linkFormat: ''
 	} );
-	$('.tabbable').on('shown', '.editor_tab', function(e) {
+	$('.tabbable').on('shown', '.link_edit', function(e) {
 	    var par_id = GetParId(e.target);
 	    $("#form_"+par_id).find("textarea,:text").each(function(i, e) {
 		UpdatePreview(e)});
@@ -72,6 +72,17 @@ function UpdatePreview(trigger) {
     } else if (trigger.name=="title") {
 	$("#title_"+par_id).html("<h3>"+trigger.value+"<h3>");
     }
+}
+
+function ResetEdit(par_id) {
+    $("#form_"+par_id).find("textarea").val(orig_pars[par_id]);
+    // TODO(kazeevn) reset title as well
+    //    $("#form_"+par_id).find("text[name=title]").val(orig_pars[par_id]);
+    $("#tabbable_"+par_id).find(".tab-pane,li").removeClass("active");
+    $("#tabbable_"+par_id).find(".link_edit").addClass("active in");
+    $("#edit_"+par_id).addClass("active");
+    $("#form_"+par_id).find("textarea,:text").each(function(i, e) {
+	UpdatePreview(e)});
 }
 
 function GetParId(element) {
@@ -173,10 +184,10 @@ function AddPar() {
 	    <ul class="nav nav-tabs" data-par-id="{{ paragraph.id }}">
 	      <li class="active link_view"><a href="#view_{{ paragraph.id }}"
 				    data-toggle="tab">View</a></li>
-    <li><a class="editor_tab",
+    <li class="link_edit"><a class="link_edit",
 href="#edit_{{ paragraph.id }}" data-toggle="tab">Edit</a></li>
     <li><a class="compare_tab",
-href="#tab_compare_{{ paragraph.id }}" data-toggle="tab">Compare & Commit</a></li>
+href="#tab_compare_{{ paragraph.id }}" data-toggle="tab">Compare & Commit || Reset</a></li>
 	    </ul>
 	    <div class="tab-content">
 	      <div class="tab-pane active" id="view_{{ paragraph.id }}">
@@ -199,7 +210,7 @@ href="#tab_compare_{{ paragraph.id }}" data-toggle="tab">Compare & Commit</a></l
 		</div>
 	      <div class="tab-pane" id="tab_compare_{{ paragraph.id }}">
 		<div class="row well form-inline">
-		  <button class="btn" onclick="ResesEdit('{{ paragraph.id }}')">Reset edit</button>
+		  <button class="btn" onclick="ResetEdit('{{ paragraph.id }}')">Reset edit</button>
 		  <button class="btn" onclick="Commit('{{ paragraph.id }}')">Commit</button>
 		</div>
 		<div class="row" id="compare_{{ paragraph.id }}"></div>
