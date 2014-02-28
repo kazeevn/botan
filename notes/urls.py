@@ -3,16 +3,11 @@ from django.contrib import admin
 from django.views.generic import ListView, DetailView
 
 from models import Note
+from notes.views import NoteListView, NoteDetailView
 
 urlpatterns = patterns('notes.views',
-    url(r'^$', ListView.as_view(
-        model=Note,
-        context_object_name="notes_list"
-        ), name='notes_root'),
-    url(r'^(?P<pk>\d+)/$', DetailView.as_view(
-        model=Note,
-        template_name='notes/detail.html'
-        ), name='notes_detail'),
+    url(r'^$', NoteListView.as_view(), name='notes_root'),
+    url(r'^(?P<pk>\d+)/$', NoteDetailView.as_view(), name='notes_detail'),
     url(r'^preview/$', 'preview'),
     url(r'^(?P<note_id>\d+)/(?P<par_id>\d+)/text$', 'paragraph_text'),
     url(r'^(?P<note_id>\d+)/(?P<par_id>\d+)/upload$', 'upload'),

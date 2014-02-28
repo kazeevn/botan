@@ -15,10 +15,12 @@ urlpatterns = patterns('',
     (r'^followit/', include('followit.urls')),
     (r'^robots.txt$', include('robots.urls')),
     url( # TODO: replace with django.conf.urls.static ?
-        r'^%s(?P<path>.*)$' % settings.MEDIA_URL[1:], 
+        r'^%s(?P<path>.*)$' % settings.MEDIA_URL[1:],
         'django.views.static.serve',
         {'document_root': settings.MEDIA_ROOT.replace('\\','/')},
     ),
+    url(r'^social/', include('social.apps.django_app.urls', namespace='social',
+                             app_name='social'))
 )
 
 if 'rosetta' in settings.INSTALLED_APPS:

@@ -29,16 +29,159 @@
     <script src="/assets/js/diff/difflib.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
     <script src="http://malsup.github.com/jquery.form.js"></script>
-    <script type="text/javascript">
-      var orig_pars = new Array(); //Holds unchanged text for diff and cancel
-      $(document).ready(function() {
-        {% for par in note.paragraph_set.all %}
-        $("#form_{{ par.id }}").ajaxForm();
-        orig_pars[{{par.id}}] =  $("#form_"+{{ par.id }}).find("textarea").val();
-        {% endfor %}
-      });
+    <script type="text/javascript" src="http://www.google.com/recaptcha/api/js/recaptcha_ajax.js">
     </script>
-    <script src="/assets/js/detail.js"></script>
+    <script type="text/javascript">
+    var creole;
+    var orig_pars = new Array(); //Holds unchanged text for diff and cancel
+    $(document).ready(function() {
+	{% for par in note.paragraph_set.all %}
+	$("#form_{{ par.id }}").ajaxForm();
+	orig_pars[{{par.id}}] =  $("#form_"+{{ par.id }}).find("textarea").val();
+	{% endfor %}
+	// TODO initialise using ajax and on demand
+	creole = new Parse.Simple.Creole( {
+	    forIE: document.all,
+	    interwiki: {
+		WikiCreole: 'http://www.wikicreole.org/wiki/',
+		Wikipedia: 'http://en.wikipedia.org/wiki/'
+	    },
+	    linkFormat: ''
+	} );
+	$('.tabbable').on('shown', '.link_edit', function(e) {
+	    var par_id = GetParId(e.target);
+	    $("#form_"+par_id).find("textarea,:text").each(function(i, e) {
+		UpdatePreview(e)});
+	});
+	$('.tabbable').on('shown', '.link_compare', function(e) {
+	    var par_id = GetParId(e.target);
+            if (par_id != "add")
+               Compare(par_id);
+	});
+	$('#main').bind('keyup paste change', function(e) {
+	    UpdatePreview(e.srcElement);
+	});
+	$('.link_view').data("content", "View the paragraph in its current form.");
+	$('.link_edit').data("content", "Make the paragraph better by editing it.");
+	$('.link_compare').data("content", "See the changes you've just made, commit or undo them.");
+	$('.btn_reset').data("content", "Undo your changes and restore original text.");
+	$('.btn_commit').data("content", "Save your changes for the others to see.");
+	$('.link_view,.link_edit,.link_compare,.btn_reset,.btn_commit').data("title", "What's that?");
+	$('.link_view,.link_edit,.link_compare,.btn_reset,.btn_commit').popover();
+    });
+
+// Gets NOT a jquery object
+function UpdatePreview(trigger) {
+    var par_id = GetParId(trigger);
+    if (trigger.name=="text") {
+	var target = document.getElementById("preview_"+par_id);
+	target.innerHTML="&nbsp";
+	creole.parse(target, trigger.value);
+	MathJax.Hub.Queue(["Typeset",MathJax.Hub,"preview_"+par_id]);
+    } else if (trigger.name=="title") {
+	$("#title_"+par_id).html("<h3>"+trigger.value+"&nbsp<h3>");
+    }
+}
+
+function ResetEdit(par_id) {
+    if (par_id=="add") {
+	$("#form_"+par_id).find("textarea").val("");
+    } else {
+	$("#form_"+par_id).find("textarea").val(orig_pars[par_id]);
+    }
+    // TODO(kazeevn) reset title as well
+    //    $("#form_"+par_id).find("text[name=title]").val(orig_pars[par_id]);
+    $("#tabbable_"+par_id).find(".tab-pane,li").removeClass("active");
+    $("#tabbable_"+par_id).find(".link_edit").addClass("active in");
+    $("#edit_"+par_id).addClass("active");
+    $("#form_"+par_id).find("textarea,:text").each(function(i, e) {
+	UpdatePreview(e)});
+}
+
+function GetParId(element) {
+    return $(element).parents("[data-par-id]").data("par-id");
+}
+
+function  Preview(par_id)
+{
+    var options = {
+	target: "#preview_"+par_id,
+	url: "{% url notes.views.preview %}",
+	success: function() {
+            MathJax.Hub.Queue(["Typeset",MathJax.Hub,"preview_"+par_id]);
+	}};
+    $("#form_"+par_id).ajaxSubmit(options);
+
+};
+function ToogleImage(par_id)
+{
+    $("#image_"+par_id).attr("src", document.location+par_id+"/image");
+};
+
+function Compare(par_id)
+{
+    var base = difflib.stringAsLines(orig_pars[par_id]);
+    var newtxt = difflib.stringAsLines($("#form_"+par_id).find("textarea").val());
+    var sm = new difflib.SequenceMatcher(base, newtxt);
+    var opcodes = sm.get_opcodes();
+    var diffoutputdiv = document.getElementById("compare_"+par_id);
+    while (diffoutputdiv.firstChild) diffoutputdiv.removeChild(diffoutputdiv.firstChild);
+    var contextSize = 3;
+    contextSize = contextSize ? contextSize : null;
+    diffoutputdiv.appendChild(diffview.buildView({ baseTextLines:base,
+						   newTextLines:newtxt,
+						   opcodes:opcodes,
+						   baseTextName:"Was",
+						   newTextName:"After your edit",
+						   contextSize:contextSize,
+						   viewType: 0}));
+
+
+};
+
+
+function AddParServer ()
+{
+    var options = {
+	  target: "#preview_add",
+      success: function () { location.reload(); },
+        error: unauthorized,
+        type: "POST"
+	  };
+    $("#form_add").ajaxSubmit(options);
+}
+
+function Commit(par_id)
+{
+   var options = {
+	  target: "#view_"+par_id,
+          error: unauthorized,
+          type: "POST"
+	  };
+  $("#form_"+par_id).ajaxSubmit(options);
+
+    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"view_"+par_id]);
+	  orig_pars[par_id]= $("#form_"+par_id).find("textarea[name=text]").val();
+
+	  $("#tabbable_"+par_id).find(".tab-pane,li").removeClass("active");
+	  $("#view_"+par_id).addClass("active");
+	  $("#tabbable_"+par_id).find(".link_view").addClass("active in");
+};
+
+{% load url from future %}
+function unauthorized (response) {
+  $("#alert-place").append($(
+  "<div class='alert alert-error fade in' data-alert>"+
+  "<button class='close' data-dismiss='alert'>×</button>"+
+  "Please <a href='{% url 'social:begin' 'google' %}' target='_blank'>Login</a>"+
+  " to commit. We did have problems with spam</div>"));
+}
+
+function AddPar() {
+    $("#add").css('display', 'inline')
+};
+
+    </script>
   </head>
   <body>
     <div class="navbar navbar-fixed-top">
@@ -47,6 +190,10 @@
 	  <ul class='nav'>
 	    <li>
 	      <a class="brand" href="http://code.google.com/p/botan/"> Brain Overflow</a>
+	    </li>
+	    <li>
+	      {% load url from future %}
+	      <a href="{% url 'social:begin' 'google' %}?next={{ request.path }}">Login</a>
 	    </li>
 	    <li>
 	      <ul class="breadcrumb">
@@ -68,6 +215,7 @@
 	  <h1>{{ note.title }}</h1>
 	</div>
       </div>
+      <div id="alert-place"></div>
       {% for paragraph in note.paragraph_set.all %}
       <div class="row" data-par-id="{{ paragraph.id }}">
 	<div class="row">
@@ -98,11 +246,13 @@
 		    <div class="span6" id="preview_{{ paragraph.id }}">&nbsp</div>
    		    <textarea class="span6" name="text">{{ paragraph.text }}</textarea>
 		  </div>
+		  {{ add_form.captcha_ }}
 		</form>
 	      </div>
 	      <div class="tab-pane" id="tab_compare_{{ paragraph.id }}">
 		<div class="row well form-inline span12">
-		  <button class="btn btn_reset" onclick="ResetEdit('{{ paragraph.id }}')">Reset edit</button>
+		  <button class="btn btn_reset" onclick="ResetEdit('{{ paragraph.id }}')">
+		    Reset edit</button>
 		  <button class="btn btn_commit" onclick="Commit('{{ paragraph.id }}')">Commit</button>
 		</div>
 		<div class="row span12" id="compare_{{ paragraph.id }}"></div>
@@ -140,7 +290,7 @@
 	      <div class="tab-pane" id="tab_compare_add">
 		<div class="row well form-inline">
 		  <button class="btn btn_reset" onclick="ResetEdit('add')">Reset edit</button>
-		  <button class="btn btn_commit" onclick="Commit('add')">Commit</button>
+		  <button class="btn btn_commit" onclick="AddParServer()">Commit</button>
 		</div>
 	      </div>
 	    </div>
@@ -152,7 +302,6 @@
 	<p>&copy; {{ note.author}}</p>
       </footer>
     </div>
-
     <script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.0.3/bootstrap.min.js"></script>
     <script src="/assets/js/jquery.autogrow-textarea.js"></script>
     <script type='text/javascript'>

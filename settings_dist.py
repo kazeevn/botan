@@ -27,6 +27,8 @@ if (os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine') or
       'NAME': 'NAME',
       }
     }
+    RECAPTCHA_PRIVATE_KEY = "KEY"
+    RECAPTCHA_PUBLIC_KEY = "KEY"
 else:
   DATABASE_ENGINE = 'mysql' # only postgres (>8.3) and mysql are supported so far others have not been tested yet
   DATABASE_NAME = 'django'             # Or path to database file if using sqlite3.
@@ -34,6 +36,8 @@ else:
   DATABASE_PASSWORD = 'pass'         # Not used with sqlite3.
   DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
   DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+  RECAPTCHA_PRIVATE_KEY = "KEY"
+  RECAPTCHA_PUBLIC_KEY = "KEY"
 
 #outgoing mail server settings
 SERVER_EMAIL = ''
@@ -141,6 +145,7 @@ ASKBOT_MAX_UPLOAD_FILE_SIZE = 1024 * 1024 #result in bytes
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 
+TEMPLATE_DIRS = ('templates',) #template have no effect in askbot, use the variable below
 #TEMPLATE_DIRS = (,) #template have no effect in askbot, use the variable below
 #ASKBOT_EXTRA_SKINS_DIR = #path to your private skin collection
 #take a look here http://askbot.org/en/question/207/
@@ -152,6 +157,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'askbot.user_messages.context_processors.user_messages',#must be before auth
     'django.core.context_processors.auth', #this is required for admin
     'django.core.context_processors.csrf', #necessary for csrf protection
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect'
 )
 
 
@@ -178,6 +185,9 @@ INSTALLED_APPS = (
     'djkombu',
     'followit',
     #'avatar',#experimental use git clone git://github.com/ericflo/django-avatar.git$
+    'notes',
+    'captcha',
+    'social.apps.django_app.default'
 )
 
 
@@ -199,6 +209,12 @@ CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'askbot.deps.django_authopenid.backends.AuthBackend',
+    'social.backends.open_id.OpenIdAuth',
+    'social.backends.google.GoogleOpenId',
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.google.GoogleOAuth',
+    'social.backends.twitter.TwitterOAuth',
+    'social.backends.yahoo.YahooOpenId',
 )
 
 #logging settings
@@ -218,8 +234,8 @@ logging.basicConfig(
 ASKBOT_URL = 'qa/' #no leading slash, default = '' empty string
 ASKBOT_TRANSLATE_URL = True #translate specific URLs
 _ = lambda v:v #fake translation function for the login url
-LOGIN_URL = '/%s%s%s' % (ASKBOT_URL,_('account/'),_('signin/'))
-LOGIN_REDIRECT_URL = ASKBOT_URL #adjust, if needed
+LOGIN_URL = '/social/login/google'
+LOGIN_REDIRECT_URL = '/assets/close.html'
 #note - it is important that upload dir url is NOT translated!!!
 #also, this url must not have the leading slash
 ALLOW_UNICODE_SLUGS = False

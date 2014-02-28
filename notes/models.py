@@ -1,6 +1,7 @@
 from django.db import models
 from django import forms
 from creoleparser import text2html
+import captcha.fields
 
 class Note(models.Model):
   title = models.CharField(max_length = 200)
@@ -10,8 +11,15 @@ class Note(models.Model):
     return self.title
 
   class AddForm(forms.Form):
-    title = forms.CharField(max_length=200)
-    author = forms.CharField(max_length = 100)
+    captcha_ = captcha.fields.RecaptchaField(required=True)
+    title = forms.CharField(max_length=200, required=True,
+                            widget=forms.TextInput(
+                              attrs={'class' : 'span6',
+                                     'placeholder' : 'Title'}))
+    author = forms.CharField(max_length=100, required=True,
+                             widget=forms.TextInput(
+                              attrs={'class' : 'span4',
+                                     'placeholder' : 'Author'}))
 
 class Paragraph(models.Model):
   is_rendered = False

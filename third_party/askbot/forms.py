@@ -117,7 +117,7 @@ class TitleField(forms.CharField):
         return value
 
 class EditorField(forms.CharField):
-    """EditorField is subclassed by the 
+    """EditorField is subclassed by the
     :class:`QuestionEditorField` and :class:`AnswerEditorField`
     """
     length_error_template_singular = 'post content must be > %d character',
@@ -138,7 +138,7 @@ class EditorField(forms.CharField):
                 self.length_error_template_singular,
                 self.length_error_template_plural,
                 self.min_length
-            ) % self.min_length 
+            ) % self.min_length
             raise forms.ValidationError(msg)
         return value
 

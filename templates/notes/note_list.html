@@ -12,26 +12,38 @@
   </style>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
   <script src="http://malsup.github.com/jquery.form.js"></script>
+  <script type="text/javascript" src="http://www.google.com/recaptcha/api/js/recaptcha_ajax.js">
+  </script>
   <script type="text/javascript">
     $(document).ready(function() {
-	$("#form_add").ajaxForm({ beforeSubmit: validate, success:amend_list });
+	$("#form_add").ajaxForm({
+    beforeSubmit: validate,
+    success: note_added,
+    error: server_validation_failed});
     });
 function validate(formData, jqForm, options) {
     for (var i=0; i < formData.length; i++) {
 	if (!formData[i].value) {
-	    newAlert('alert-error', 'Your data is wrong. Most likely, you just have left an empty field.');
+	    newAlert('All fields are required.');
             return false;
         }
     }
     $(".alert").alert('close');
     return true;
 }
-function amend_list(responseText, statusText, xhr, $form)  {
-    $("#notes_list").append(responseText);
+
+function server_validation_failed (response) {
+    newAlert(response.responseText);
+    Recaptcha.reload();
 }
-function newAlert (type, message) {
+
+function note_added(responseText, statusText, xhr, $form)  {
+    $("#notes_list").append(responseText);
+    Recaptcha.reload();
+}
+function newAlert (message) {
     $("#alert-place").append($(
-	"<div class='alert " + type +
+	"<div class='alert " + 'alert-error' +
 	    " fade in' data-alert><button class='close' data-dismiss='alert'>×</button>"
 	    +message+"</div>"));
 }
@@ -69,10 +81,13 @@ function newAlert (type, message) {
 <div id="added_id"></div>
 <div id="alert-place"></div>
 <div class="row">
-<form class="well form-inline" action="{% url notes.views.add_note %}" method="post" id="form_add">
-  <input type="submit" class="btn span2" id="btn_add" value="Add">
-  <input type="text" name="title" class="span6" id="title" placeholder="Title">
-  <input type="text" name="author" class="span4" id="author" placeholder="Author">
+<form action="{% url notes.views.add_note %}" method="post" id="form_add">
+  <div class="well form-inline">
+    <input type="submit" class="btn span2" id="btn_add" value="Add">
+    {{ add_form.title }}
+    {{ add_form.author }}
+ </div>
+ {{ add_form.captcha_ }}
 </form>
 </div>
 </div>

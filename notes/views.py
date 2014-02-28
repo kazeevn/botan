@@ -7,9 +7,25 @@ from django.views.generic.simple import direct_to_template
 import datetime
 import re
 import mimetypes
+from django.views.generic import ListView, DetailView
+from recaptcha_works.decorators import fix_recaptcha_remote_ip
 
 #TODO(kazeevn) Make it a separate backend
 from google.appengine.ext import blobstore
+
+class NoteListView(ListView):
+  model=Note
+  context_object_name="notes_list"
+  template_name = "note_list.html"
+
+  def get_context_data(self, **kwargs):
+    context = super(NoteListView, self).get_context_data(**kwargs)
+    context['add_form'] = Note.AddForm()
+    return context
+
+class NoteDetailView(DetailView):
+  model=Note
+  template_name='notes/detail.html'
 
 def serve_image(request, note_id, par_id):
   p = get_object_or_404(Paragraph, pk=par_id)
@@ -30,7 +46,7 @@ def get_blob_key(request):
     return res.group().replace('"', '')
   else:
     return None
-  
+
 def upload(request, note_id, par_id):
   p = get_object_or_404(Paragraph, pk=par_id)
   if request.method == 'POST':
@@ -86,6 +102,8 @@ def paragraph_rendered(request, note_id, par_id):
   return HttpResponse(p.rendered)
 
 def add(request, note_id):
+  if not request.user.is_authenticated():
+    return HttpResponseForbidden()
   n = get_object_or_404(Note, pk=note_id)
   if request.method == 'POST':
     form = Paragraph.EditForm(request.POST)
@@ -97,12 +115,13 @@ def add(request, note_id):
       p.last_edit = datetime.datetime.now()
       p.render()
       p.save()
-      return HttpResponseRedirect(reverse('notes_detail', args=[n.id]))
+      return HttpResponse(p.rendered)
     else:
       return HttpResponseForbidden("Invalid data.")
   else:
     return HttpResponseForbidden("POST, please!")
 
+@fix_recaptcha_remote_ip
 def add_note(request):
   if request.method == 'POST':
     form = Note.AddForm(request.POST)
@@ -115,12 +134,13 @@ def add_note(request):
       # TODO(kazeevn) redo it in a better style
       return HttpResponse(u"<li><a href=/notes/{0}>{1}</a></li>".format(n.id, n.title))
     else:
-      return HttpResponseForbidden("Invalid data.")
+      return HttpResponseForbidden(form.errors.__unicode__())
   else:
     return HttpResponseForbidden("POST, please!")
 
-
 def commit(request, note_id, par_id):
+  if not request.user.is_authenticated():
+    return HttpResponseForbidden()
   n = get_object_or_404(Note, pk=note_id)
   if request.method == 'POST':
     form = Paragraph.EditForm(request.POST)
