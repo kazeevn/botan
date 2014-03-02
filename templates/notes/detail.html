@@ -156,11 +156,14 @@ function Commit(par_id)
    var options = {
 	  target: "#view_"+par_id,
           error: unauthorized,
-          type: "POST"
+          type: "POST",
+	  success: function () {
+	     	  MathJax.Hub.Queue(["Typeset",MathJax.Hub,"view_"+par_id]);
+	  }
 	  };
   $("#form_"+par_id).ajaxSubmit(options);
 
-    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"view_"+par_id]);
+
 	  orig_pars[par_id]= $("#form_"+par_id).find("textarea[name=text]").val();
 
 	  $("#tabbable_"+par_id).find(".tab-pane,li").removeClass("active");
