@@ -12,8 +12,6 @@
   </style>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
   <script src="http://malsup.github.com/jquery.form.js"></script>
-  <script type="text/javascript" src="http://www.google.com/recaptcha/api/js/recaptcha_ajax.js">
-  </script>
   <script type="text/javascript">
     $(document).ready(function() {
 	$("#form_add").ajaxForm({
@@ -34,12 +32,10 @@ function validate(formData, jqForm, options) {
 
 function server_validation_failed (response) {
     newAlert(response.responseText);
-    Recaptcha.reload();
 }
 
 function note_added(responseText, statusText, xhr, $form)  {
     $("#notes_list").append(responseText);
-    Recaptcha.reload();
 }
 function newAlert (message) {
     $("#alert-place").append($(
@@ -87,7 +83,6 @@ function newAlert (message) {
     {{ add_form.title }}
     {{ add_form.author }}
  </div>
- {{ add_form.captcha_ }}
 </form>
 </div>
 </div>

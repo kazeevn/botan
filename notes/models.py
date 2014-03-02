@@ -1,7 +1,6 @@
 from django.db import models
 from django import forms
 from creoleparser import text2html
-import captcha.fields
 
 class Note(models.Model):
   title = models.CharField(max_length = 200)
@@ -11,7 +10,6 @@ class Note(models.Model):
     return self.title
 
   class AddForm(forms.Form):
-    captcha_ = captcha.fields.RecaptchaField(required=True)
     title = forms.CharField(max_length=200, required=True,
                             widget=forms.TextInput(
                               attrs={'class' : 'span6',
@@ -29,7 +27,7 @@ class Paragraph(models.Model):
   text = models.TextField(max_length = 10000)
   last_edit = models.DateTimeField('last edit')
   blob_key = models.CharField(max_length = 256)
-  #TODO(kazeevn) chack actual max_length
+  #TODO(kazeevn) check actual max_length
 
   #TODO(kazeevn) add creation time
   #TODO(kazeevn) add proper constructor

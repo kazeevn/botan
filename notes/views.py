@@ -8,7 +8,6 @@ import datetime
 import re
 import mimetypes
 from django.views.generic import ListView, DetailView
-from recaptcha_works.decorators import fix_recaptcha_remote_ip
 
 #TODO(kazeevn) Make it a separate backend
 from google.appengine.ext import blobstore
@@ -103,7 +102,9 @@ def paragraph_rendered(request, note_id, par_id):
 
 def add(request, note_id):
   if not request.user.is_authenticated():
-    return HttpResponseForbidden()
+    return HttpResponseForbidden(
+      '<a href="{0}" target="_blank">Login</a> required'.format(
+        reverse("social:begin", args=('google',))))
   n = get_object_or_404(Note, pk=note_id)
   if request.method == 'POST':
     form = Paragraph.EditForm(request.POST)
@@ -121,8 +122,11 @@ def add(request, note_id):
   else:
     return HttpResponseForbidden("POST, please!")
 
-@fix_recaptcha_remote_ip
 def add_note(request):
+  if not request.user.is_authenticated():
+    return HttpResponseForbidden(
+      '<a href="{0}" target="_blank">Login</a> required'.format(
+        reverse("social:begin", args=('google',))))
   if request.method == 'POST':
     form = Note.AddForm(request.POST)
     if form.is_valid():
@@ -140,7 +144,9 @@ def add_note(request):
 
 def commit(request, note_id, par_id):
   if not request.user.is_authenticated():
-    return HttpResponseForbidden()
+    return HttpResponseForbidden(
+      '<a href="{0}" target="_blank">Login</a> required'.format(
+        reverse("social:begin", args=('google',))))
   n = get_object_or_404(Note, pk=note_id)
   if request.method == 'POST':
     form = Paragraph.EditForm(request.POST)

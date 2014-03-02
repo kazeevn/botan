@@ -168,13 +168,15 @@ function Commit(par_id)
 	  $("#tabbable_"+par_id).find(".link_view").addClass("active in");
 };
 
-{% load url from future %}
 function unauthorized (response) {
-  $("#alert-place").append($(
-  "<div class='alert alert-error fade in' data-alert>"+
-  "<button class='close' data-dismiss='alert'>×</button>"+
-  "Please <a href='{% url 'social:begin' 'google' %}' target='_blank'>Login</a>"+
-  " to commit. We did have problems with spam</div>"));
+  newAlert(response.responseText);
+}
+
+function newAlert (message) {
+    $("#alert-place").append($(
+	"<div class='alert " + 'alert-error' +
+	    " fade in' data-alert><button class='close' data-dismiss='alert'>×</button>"
+	    +message+"</div>"));
 }
 
 function AddPar() {
